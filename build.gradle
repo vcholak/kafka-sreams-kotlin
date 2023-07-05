@@ -1,0 +1,47 @@
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.8.22'
+    id 'java'
+    id 'application'
+    id 'idea'
+    id 'com.github.davidmc24.gradle.plugin.avro-base' version '1.7.1'
+}
+
+ext {
+    avroVersion = '1.10.2'
+    javaMainClass = 'org.ruthenia.itc.MainKt'
+}
+
+application {
+    mainClassName = javaMainClass
+}
+
+group = 'org.ruthenia.itc'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://packages.confluent.io/maven'
+    }
+}
+
+dependencies {
+    implementation('org.apache.kafka:kafka-streams:3.4.0')
+    implementation('org.apache.kafka:kafka-clients:3.4.0')
+    implementation('org.apache.avro:avro:${avroVersion}')
+    implementation('io.confluent:kafka-avro-serializer:6.1.0')
+    implementation('io.confluent:kafka-streams-avro-serde:7.4.0')
+    implementation('org.slf4j:slf4j-log4j12:2.0.7')
+    implementation('io.github.microutils:kotlin-logging-jvm:2.0.11')
+}
+
+def generateAvro = tasks.register('generateAvro', GenerateAvroJavaTask) {
+    source('src/main/avro')
+    outputDir = file('src/main/java')
+}
+
+tasks.named('compileJava').configure {
+    source(generateAvro)
+}

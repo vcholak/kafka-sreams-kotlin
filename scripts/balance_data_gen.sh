@@ -4,7 +4,7 @@ curl --request POST \
   --header 'content-type: application/vnd.kafka.avro.v2+json' \
   --data '{
     "key_schema": "{\"name\":\"key\",\"type\": \"string\"}",
-    "value_schema_id": "2",
+    "value_schema_id": "9",
     "records": [
         {
             "key" : "678",

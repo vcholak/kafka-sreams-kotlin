@@ -2,14 +2,14 @@
 
 It demonstrates joining two Kafka streams into a resulting stream.
 
-## Install Confluence Platform
+## Install Confluent Platform
 
-Just once, install a local Confluence Platform stack using Docker:
+Just once, install a local Confluent Platform stack using Docker:
 
 ```bash
 docker compose up -d
 ```
-It will first install a local Confluence Platform stack using _./docker-compose.yml_ file.
+It will first install a local Confluent Platform stack using _./docker-compose.yml_ file.
 Then it starts the local platform.
 
 Further on: in Docker Desktop, just start the **confluence** container stack.

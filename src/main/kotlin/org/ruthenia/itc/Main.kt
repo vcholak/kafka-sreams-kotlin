@@ -34,6 +34,7 @@ fun main() {
         }
     }
     Runtime.getRuntime().addShutdownHook(shutdownListener)
+
     val bootstrapServers = "localhost:9092"
     val schemaRegistryUrl = "http://localhost:8081"
     val config = Properties()
@@ -45,20 +46,23 @@ fun main() {
     Serdes.String().use { stringSerde ->
         config[StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG] = stringSerde.javaClass.name
         config[StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java.name
-        val builder = StreamsBuilder()
         val serdeConfigs: Map<String, *> = Collections.singletonMap(
             AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
             schemaRegistryUrl
         )
+
+        val builder = StreamsBuilder()
         val customerSerde: Serde<Customer> = SpecificAvroSerde()
         customerSerde.configure(serdeConfigs, false)
         val customers: KStream<String, Customer> =
             builder.stream("Customer", Consumed.with(stringSerde, customerSerde))
         customers.peek { key, customer -> logger.info("Customer: {} -> {}", key, customer) }
+
         val balanceSerde: Serde<Balance> = SpecificAvroSerde()
         balanceSerde.configure(serdeConfigs, false)
         val balances: KStream<String, Balance> = builder.stream("Balance", Consumed.with(stringSerde, balanceSerde))
         balances.peek { key, balance -> logger.info("Balance: {} -> {}", key, balance) }
+
         val customerBalances: KStream<String, CustomerBalance> = customers.join(
             balances,
             { customer: Customer, balance: Balance ->
@@ -76,6 +80,7 @@ fun main() {
         val customerBalanceSerde: Serde<CustomerBalance> = SpecificAvroSerde()
         customerBalanceSerde.configure(serdeConfigs, false)
         customerBalances.to("CustomerBalance", Produced.with(stringSerde, customerBalanceSerde))
+
         val topology: Topology = builder.build()
         KafkaStreams(topology, config).use { streams ->
             streams.start()
